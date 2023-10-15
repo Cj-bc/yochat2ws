@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"strings"
 	"io"
 	"fmt"
@@ -95,7 +96,7 @@ func ReceiveMessages(ctx context.Context, service *youtube.LiveChatMessagesServi
 }
 
 type HandleWatch struct {
-	logger io.Writer
+	logger slog.Logger
 	service *youtube.Service
 }
 
@@ -105,7 +106,7 @@ func NewHandleWatch(ctx context.Context) (HandleWatch, error) {
 		return HandleWatch{}, err
 	}
 	return HandleWatch{
-		logger: log.Writer(),
+		logger: *slog.Default(),
 		service: service,
 	}, nil
 }
