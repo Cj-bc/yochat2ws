@@ -175,6 +175,6 @@ LOOP2:
 }
 
 func main() {
-	http.HandleFunc("watch", SubscribeHandler)
+	http.HandleFunc("/watch", SubscribeHandler)
 	http.ListenAndServe(":12539", nil)
 }
