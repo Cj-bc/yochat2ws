@@ -139,9 +139,8 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// invalid request
 	chatId, err := RetriveLiveChatId(broadcastId, s.service.LiveBroadcasts)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Could not retrive chatId for broadcastId %v", broadcastId)))
 		s.logger.Info("[Close] could not retrive chatId", "chatId", broadcastId, "error", err, "ResponseCode", http.StatusBadRequest)
+		c.Close(websocket.StatusAbnormalClosure, fmt.Sprintf("Could not retrive chatId for broadcastId %v", broadcastId))
 		return
 	}
 
