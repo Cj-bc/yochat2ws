@@ -154,7 +154,7 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Redirect chat messages to peer
 	sendCh := make(chan *youtube.LiveChatMessage, 2)
-	go ReceiveMessages(ctx, chatId, sendCh)
+	go ReceiveMessages(ctx, s.service.LiveChatMessages, chatId, sendCh)
 
 LOOP2:
 	for {
