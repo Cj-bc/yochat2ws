@@ -174,6 +174,13 @@ LOOP2:
 }
 
 func main() {
-	http.HandleFunc("/watch", SubscribeHandler)
-	http.ListenAndServe(":12539", nil)
+	ctx := context.Background()
+	handler, err := NewHandleWatch(ctx)
+	if err != nil {
+		log.Fatalf("Could not creaet handler: %v", err)
+	}
+	handler.logger.Info("Succeed to create handler. Starting server...")
+
+	http.Handle("/watch", handler)
+	log.Fatalf("Server killed: %v", http.ListenAndServe(":12539", nil))
 }
