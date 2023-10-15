@@ -113,6 +113,7 @@ func NewHandleWatch(ctx context.Context) (HandleWatch, error) {
 
 func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Retrive broadcast ID from "broadcastId" or "url" query parameters.
+	s.logger.Info("Connection requested", "from", r.Host, "uri", r.RequestURI)
 	broadcastId := r.FormValue("broadcastId")
 	if broadcastId == "" {
 		broadcastUrl := r.FormValue("url")
@@ -120,6 +121,7 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if after, found := strings.CutPrefix(broadcastUrl, "https://youtube.com/watch?="); found {
 			broadcastId = after
 		} else {
+			s.logger.Info("No broadcastId is specified", "from", r.Host, "uri", r.RequestURI, "ResponseCode", http.StatusBadRequest)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("One of broadcastId or url should be provided."))
 			return
@@ -131,7 +133,7 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Failed to accept websocket request: %v", err)
 	}
-	defer c.Close(websocket.StatusInternalError, "Server is closing by defer.")
+	defer c.Close(websocket.StatusInternalError, "Server is closing by defer statement.")
 
 	// Retrive chatId before doing anything more so that we can reject
 	// invalid request
@@ -139,7 +141,7 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("Could not retrive chatId for broadcastId %v", broadcastId)))
-		log.Printf("Failed: could not retrive chatId for %v: %v", broadcastId, err)
+		s.logger.Info("[Close] could not retrive chatId", "chatId", broadcastId, "error", err, "ResponseCode", http.StatusBadRequest)
 		return
 	}
 
