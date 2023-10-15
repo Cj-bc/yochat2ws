@@ -166,7 +166,7 @@ LOOP2:
 				cancel()
 			}
 		case msg := <-sendCh:
-			c.Write(ctx, websocket.MessageText, []byte(""))
+			c.Write(ctx, websocket.MessageText, []byte(msg.Snippet.DisplayMessage))
 		case <-ctx.Done():
 			break LOOP2
 		}
