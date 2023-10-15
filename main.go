@@ -71,7 +71,7 @@ func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Co
 
 func ReceiveMessages(ctx context.Context, service *youtube.LiveChatMessagesService, chatId string, ch chan<- *youtube.LiveChatMessage) error {
 	call := service.List(chatId, []string{"snippet", "authorDetails"})
-	var googleApiErr googleapi.Error
+	var googleApiErr = googleapi.Error{}
 	for {
 		select {
 		case <-ctx.Done():
