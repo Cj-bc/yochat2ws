@@ -1,0 +1,30 @@
+* YouTube Live Chat to Websocket
+
+Broadcast live chat messages via websocket.
+** Usage
+Start server by executing command
+
+#+begin_src sh
+  $ go run -- --port PORT
+#+end_src
+
+Then, Send a websocket request like this:
+
+| Full YouTube link     | ~http://YOUR_SERVER_ID:PORT/watch?url=https://www.youtube.com/watch?v=xvCefQ_-jqc~ |
+| Only with broadcastId | ~http://YOUR_SERVER_ID:PORT/watch?broadcastId=xvCefQ_-jqc~                         |
+
+You will receive messages in JSON format
+
+To disconnect, send "BYE" string to the socket.
+** Query parameters
+*NOT IMPLEMENTED YET*
+
+You have to provide either ~url~ or ~broadcastId~ query
+parameter. Also, you can provide some optional query parameters:
+
+| query parameter | description              | possible values |
+|-----------------+--------------------------+-----------------|
+| format          | Specify format of output | ~json~/~csv~    |
+
+
+** How to set YouTube Data API key
