@@ -148,6 +148,7 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Start receiving commands and redirecting messages.
 
 	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
 
 	// Receive data from peer
 	cmdCh := make(chan Command, 2)
