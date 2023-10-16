@@ -3,7 +3,6 @@ package main
 import (
 	"log/slog"
 	"strings"
-	"io"
 	"fmt"
 	"log"
 	"context"
