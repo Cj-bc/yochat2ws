@@ -1,20 +1,21 @@
 package main
 
 import (
-	"log/slog"
-	"strings"
-	"fmt"
-	"log"
 	"context"
-	"net/http"
 	"errors"
-  "google.golang.org/api/youtube/v3"
-  "google.golang.org/api/option"
+	"fmt"
 	"google.golang.org/api/googleapi"
+	"google.golang.org/api/option"
+	"google.golang.org/api/youtube/v3"
+	"log"
+	"log/slog"
+	"net/http"
 	"nhooyr.io/websocket"
+	"strings"
 )
 
 type Command int
+
 const (
 	COM_BYE Command = iota
 )
@@ -25,7 +26,7 @@ type Server struct {
 
 type Subscriber struct {
 	nextPageToken string
-	service *youtube.LiveChatMessagesService
+	service       *youtube.LiveChatMessagesService
 }
 
 func (s Subscriber) ChatMessages() []*youtube.LiveChatMessage {
@@ -39,7 +40,7 @@ func (s Subscriber) Run() {
 // Retrive Live chat ID for given broadcastId
 func RetriveLiveChatId(broadcastId string, service *youtube.LiveBroadcastsService) (string, error) {
 	call := service.List([]string{"snippet"})
-	
+
 	if response, err := call.Do(); err != nil {
 		return "", err
 	} else if len(response.Items) == 0 {
@@ -49,7 +50,7 @@ func RetriveLiveChatId(broadcastId string, service *youtube.LiveBroadcastsServic
 	}
 }
 
-// Receive Command from peer and send it to channel 
+// Receive Command from peer and send it to channel
 func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Command) {
 	for {
 		select {
@@ -76,7 +77,7 @@ func ReceiveMessages(ctx context.Context, service *youtube.LiveChatMessagesServi
 		case <-ctx.Done():
 			return nil
 		default:
-			switch response, err := call.Do();  {
+			switch response, err := call.Do(); {
 			case err == nil:
 				for _, message := range response.Items {
 					ch <- message
@@ -95,7 +96,7 @@ func ReceiveMessages(ctx context.Context, service *youtube.LiveChatMessagesServi
 }
 
 type HandleWatch struct {
-	logger slog.Logger
+	logger  slog.Logger
 	service *youtube.Service
 }
 
@@ -105,7 +106,7 @@ func NewHandleWatch(ctx context.Context) (HandleWatch, error) {
 		return HandleWatch{}, err
 	}
 	return HandleWatch{
-		logger: *slog.Default(),
+		logger:  *slog.Default(),
 		service: service,
 	}, nil
 }
