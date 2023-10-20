@@ -192,6 +192,7 @@ LOOP2:
 		select {
 		case cmd := <-cmdCh:
 			if cmd == COM_BYE {
+				s.logger.Info("Connection closing by BYE command", "from", r.Host, "url", r.RequestURI)
 				cancel()
 			}
 		case msg := <-sendCh:
@@ -201,6 +202,7 @@ LOOP2:
 		}
 	}
 	c.Close(websocket.StatusAbnormalClosure, "")
+	s.logger.Info("Connection closed", "from", r.Host, "url", r.RequestURI)
 }
 
 func main() {
