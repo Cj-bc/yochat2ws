@@ -45,6 +45,7 @@ func (s Subscriber) Run() {
 // Retrive Live chat ID for given broadcastId
 func RetriveLiveChatId(broadcastId string, service *youtube.LiveBroadcastsService) (string, error) {
 	call := service.List([]string{"snippet"})
+	call.Id(broadcastId)
 
 	if response, err := call.Do(); err != nil {
 		return "", err
