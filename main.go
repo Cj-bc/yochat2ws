@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/option"
-	"google.golang.org/api/youtube/v3"
 	"log"
 	"log/slog"
 	"net/http"
-	"nhooyr.io/websocket"
 	"strings"
+
+	"google.golang.org/api/googleapi"
+	"google.golang.org/api/option"
+	"google.golang.org/api/youtube/v3"
+	"nhooyr.io/websocket"
 )
 
 type Command int
