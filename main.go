@@ -7,12 +7,16 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
 	"nhooyr.io/websocket"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 type Command int
@@ -102,7 +106,31 @@ type HandleWatch struct {
 }
 
 func NewHandleWatch(ctx context.Context) (HandleWatch, error) {
-	service, err := youtube.NewService(ctx, option.WithAPIKey(""))  // TODO: Retrive API Key from somewhere
+	// Do OAuth
+	d, err := os.ReadFile("client_secret.json")
+	if err != nil {
+		return HandleWatch{}, fmt.Errorf("Failed to read client_secret.json file: %w", err)
+	}
+	config, err := google.ConfigFromJSON(d, youtube.YoutubeReadonlyScope)
+	if err != nil {
+		return HandleWatch{}, fmt.Errorf("Failed to read config from JSON: %w", err)
+	}
+
+	const state = "TestStateCode" // TODO: DO NOT USE HARDCODED CODE HERE
+	url := config.AuthCodeURL(state, oauth2.AccessTypeOffline)
+	fmt.Printf("Access URL below and approve. Then paste token below:\n%s\n", url)
+
+	var code string
+	if i, err := fmt.Scan(&code); err != nil || i < 1 {
+		return HandleWatch{}, fmt.Errorf("Failed to receive token: %w", err)
+	}
+
+	token, err := config.Exchange(ctx, code)
+	if err != nil {
+		return HandleWatch{}, fmt.Errorf("Failed to exchange OAuth2 token: %w", err)
+	}
+
+	service, err := youtube.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
 	if err != nil {
 		return HandleWatch{}, err
 	}
