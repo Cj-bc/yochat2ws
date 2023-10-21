@@ -46,7 +46,7 @@ func RetriveLiveChatId(broadcastId string, service *youtube.LiveBroadcastsServic
 	if response, err := call.Do(); err != nil {
 		return "", fmt.Errorf("Failed to retrive live chat ID: %w", err)
 	} else if len(response.Items) == 0 {
-		return "", fmt.Errorf("No response for broadcastId %v", broadcastId)
+		return "", fmt.Errorf("response.Items for broadcastId %v did not contain anything", broadcastId)
 	} else {
 		return response.Items[0].Snippet.LiveChatId, nil
 	}
@@ -146,7 +146,8 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	chatId, err := RetriveLiveChatId(broadcastId, s.service.LiveBroadcasts)
 	if err != nil {
 		c.Close(websocket.StatusAbnormalClosure, fmt.Sprintf("Could not retrive chatId for broadcastId %v", broadcastId))
-		s.logger.Info("[Close] could not retrive chatId", "broadcastId", broadcastId, "error", err, "ResponseCode", http.StatusBadRequest)
+		s.logger.Info("[Close] could not retrive chatId", "from", r.Host, "uri", r.RequestURI,
+			"broadcastId", broadcastId, "error", err, "ResponseCode", http.StatusBadRequest)
 		return
 	}
 
