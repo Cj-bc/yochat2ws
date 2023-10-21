@@ -44,7 +44,7 @@ func RetriveLiveChatId(broadcastId string, service *youtube.LiveBroadcastsServic
 	call.Id(broadcastId)
 
 	if response, err := call.Do(); err != nil {
-		return "", err
+		return "", fmt.Errorf("Failed to retrive live chat ID: %w", err)
 	} else if len(response.Items) == 0 {
 		return "", fmt.Errorf("No response for broadcastId %v", broadcastId)
 	} else {
@@ -105,9 +105,8 @@ type HandleWatch struct {
 func NewHandleWatch(ctx context.Context) (HandleWatch, error) {
 	config, token, err := Authenticate(ctx, "client_secret.json")
 	if err != nil {
-		return HandleWatch{}, fmt.Errorf("Failed to exchange OAuth2 token: %w", err)
+		return HandleWatch{}, fmt.Errorf("Failed to authenticate using client secret: %w", err)
 	}
-
 	service, err := youtube.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
 	if err != nil {
 		return HandleWatch{}, err
