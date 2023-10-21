@@ -103,7 +103,7 @@ type HandleWatch struct {
 }
 
 func NewHandleWatch(ctx context.Context) (HandleWatch, error) {
-	config, token, err := Authenticate(ctx, "client_secret.json")
+	config, token, err := Authenticate(ctx, "client_secret.json", os.Stdin, os.Stdout)
 	if err != nil {
 		return HandleWatch{}, fmt.Errorf("Failed to authenticate using client secret: %w", err)
 	}
