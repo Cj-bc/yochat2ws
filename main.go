@@ -36,19 +36,19 @@ func RetriveLiveChatId(broadcastId string, service *youtube.VideosService) (stri
 }
 
 // Receive Command from peer and send it to channel
-func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Command) {
+func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Command) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return
+			return nil
 		default:
 			if _type, msg, err := c.Read(ctx); err != nil {
-				return
+				return err
 			} else if _type != websocket.MessageText {
 				log.Printf("Wrong message type: %v", _type)
 			} else if string(msg) == "BYE" {
 				ch <- COM_BYE
-				return
+				return nil
 			}
 		}
 	}
