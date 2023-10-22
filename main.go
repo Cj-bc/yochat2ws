@@ -191,7 +191,7 @@ LOOP2:
 			break LOOP2
 		}
 	}
-	c.Close(websocket.StatusAbnormalClosure, "")
+	c.Close(websocket.StatusNormalClosure, "")
 	s.logger.Info("Connection closed", "from", r.Host, "url", r.RequestURI)
 }
 
