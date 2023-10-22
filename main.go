@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
@@ -76,18 +77,30 @@ func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Co
 }
 
 func ReceiveMessages(ctx context.Context, service *youtube.LiveChatMessagesService, chatId string, ch chan<- *youtube.LiveChatMessage) error {
+	var pageToken = ""
 	call := service.List(chatId, []string{"snippet", "authorDetails"})
+
+	apiCallInterval := time.NewTimer(0)
+	defer apiCallInterval.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
-		default:
+		case <-apiCallInterval.C:
+			// For first call, it doesn't know pageToken. So Don't add it
+			if pageToken != "" {
+				call.PageToken(pageToken)
+			}
+
 			if response, err := call.Do(); err != nil {
 				return err
 			} else {
+				pageToken = response.NextPageToken
 				for _, message := range response.Items {
 					ch <- message
 				}
+
+				apiCallInterval.Reset(time.Duration(response.PollingIntervalMillis) * time.Millisecond)
 			}
 		}
 	}
