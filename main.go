@@ -21,23 +21,6 @@ const (
 	COM_BYE Command = iota
 )
 
-type Server struct {
-	subs []*Subscriber
-}
-
-type Subscriber struct {
-	nextPageToken string
-	service       *youtube.LiveChatMessagesService
-}
-
-func (s Subscriber) ChatMessages() []*youtube.LiveChatMessage {
-	return []*youtube.LiveChatMessage{}
-}
-
-func (s Subscriber) Run() {
-	// s.service.List()
-}
-
 // Retrive Live chat ID for given broadcastId
 func RetriveLiveChatId(broadcastId string, service *youtube.VideosService) (string, error) {
 	call := service.List([]string{"liveStreamingDetails"})
