@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -41,6 +42,9 @@ func GetToken(ctx context.Context, config *oauth2.Config, input io.Reader, outpu
 			return &oauth2.Token{}, fmt.Errorf("Failed to exchange OAuth2 token: %w", err)
 		}
 
+		if err = SaveToken(token); err != nil {
+			return &oauth2.Token{}, fmt.Errorf("Failed to save token: %w", err)
+		}
 		return token, nil
 	} else {
 		return &tok, nil
@@ -59,6 +63,20 @@ func GetCachedToken() (oauth2.Token, error) {
 		err = json.NewDecoder(f).Decode(&t)
 		return t, err
 	}
+}
+
+func SaveToken(token *oauth2.Token) error {
+	cacheFile := TokenCacheFilePath()
+	if err := os.MkdirAll(path.Dir(cacheFile), 0755); err != nil {
+		return err
+	}
+
+	f, err := os.OpenFile(cacheFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0700)
+	defer f.Close()
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("Failed to open cacheFile '%v': %w", cacheFile, err)
+	}
+	return json.NewEncoder(f).Encode(token)
 }
 
 // Do google OAuth2 authentication and return its oauth2.Config and oauth2.Token
