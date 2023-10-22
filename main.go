@@ -181,7 +181,12 @@ LOOP2:
 				cancel()
 				break
 			}
-			c.Write(ctx, websocket.MessageText, []byte(msg.Snippet.DisplayMessage))
+			byte, err := msg.MarshalJSON()
+			if err != nil {
+				s.logger.Info(fmt.Sprintf("Failed to marshal JSON: %v", err), "from", r.Host, "url", r.RequestURI)
+				break
+			}
+			c.Write(ctx, websocket.MessageText, byte)
 		case <-ctx.Done():
 			break LOOP2
 		}
