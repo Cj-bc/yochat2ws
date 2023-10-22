@@ -60,6 +60,9 @@ func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Co
 			return
 		default:
 			if _type, msg, err := c.Read(ctx); err != nil {
+				if websocket.CloseStatus(err) != -1 {
+					return
+				}
 				log.Printf("Failed to read message from socket: %v", err)
 			} else if _type != websocket.MessageText {
 				log.Printf("Wrong message type: %v", _type)
