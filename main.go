@@ -162,21 +162,35 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Receive data from peer
 	cmdCh := make(chan Command, 2)
-	go CommandReaderGoroutine(ctx, c, cmdCh)
+	go func() {
+		CommandReaderGoroutine(ctx, c, cmdCh)
+		close(cmdCh)
+	}()
 
 	// Redirect chat messages to peer
 	sendCh := make(chan *youtube.LiveChatMessage, 2)
-	go ReceiveMessages(ctx, s.service.LiveChatMessages, chatId, sendCh)
+	go func() {
+		ReceiveMessages(ctx, s.service.LiveChatMessages, chatId, sendCh)
+		close(sendCh)
+	}()
 
 LOOP2:
 	for {
 		select {
-		case cmd := <-cmdCh:
-			if cmd == COM_BYE {
+		case cmd, ok := <-cmdCh:
+			switch {
+			case !ok:
+				s.logger.Info("Connection is closed by peer", "from", r.Host, "url", r.RequestURI)
+				cancel()
+			case cmd== COM_BYE:
 				s.logger.Info("Connection closing by BYE command", "from", r.Host, "url", r.RequestURI)
 				cancel()
 			}
-		case msg := <-sendCh:
+		case msg, ok := <-sendCh:
+			if !ok {
+				cancel()
+				break
+			}
 			c.Write(ctx, websocket.MessageText, []byte(msg.Snippet.DisplayMessage))
 		case <-ctx.Done():
 			break LOOP2
