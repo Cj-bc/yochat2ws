@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strings"
 
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
 	"nhooyr.io/websocket"
@@ -77,25 +76,17 @@ func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Co
 
 func ReceiveMessages(ctx context.Context, service *youtube.LiveChatMessagesService, chatId string, ch chan<- *youtube.LiveChatMessage) error {
 	call := service.List(chatId, []string{"snippet", "authorDetails"})
-	var googleApiErr = googleapi.Error{}
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
 		default:
-			switch response, err := call.Do(); {
-			case err == nil:
+			if response, err := call.Do(); err != nil {
+				return err
+			} else {
 				for _, message := range response.Items {
 					ch <- message
 				}
-
-			case errors.As(err, &googleApiErr):
-				switch googleApiErr.Code {
-				case http.StatusBadRequest, http.StatusForbidden, http.StatusMethodNotAllowed, http.StatusUnauthorized:
-					return err
-				}
-			default:
-				return err
 			}
 		}
 	}
