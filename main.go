@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"errors"
 	"fmt"
 	"log"
@@ -60,7 +61,7 @@ func CommandReaderGoroutine(ctx context.Context, c *websocket.Conn, ch chan<- Co
 			return
 		default:
 			if _type, msg, err := c.Read(ctx); err != nil {
-				if websocket.CloseStatus(err) != -1 {
+				if websocket.CloseStatus(err) != -1 || errors.Is(err, io.EOF) {
 					return
 				}
 				log.Printf("Failed to read message from socket: %v", err)
