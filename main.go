@@ -147,15 +147,21 @@ func (s HandleWatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Receive data from peer
 	cmdCh := make(chan Command, 2)
 	go func() {
-		CommandReaderGoroutine(ctx, c, cmdCh)
+		err := CommandReaderGoroutine(ctx, c, cmdCh)
 		close(cmdCh)
+		if err != nil {
+			s.logger.Info(fmt.Sprintf("Error has occured while reading command from peer: %v", err), "from", r.Host, "uri", r.RequestURI)
+		}
 	}()
 
 	// Redirect chat messages to peer
 	sendCh := make(chan *youtube.LiveChatMessage, 2)
 	go func() {
-		ReceiveMessages(ctx, s.service.LiveChatMessages, chatId, sendCh)
+		err := ReceiveMessages(ctx, s.service.LiveChatMessages, chatId, sendCh)
 		close(sendCh)
+		if err != nil {
+			s.logger.Info(fmt.Sprintf("Error has occured while receiving LiveChatMessages: %v", err), "from", r.Host, "uri", r.RequestURI)
+		}
 	}()
 
 LOOP2:
