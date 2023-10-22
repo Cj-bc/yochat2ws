@@ -183,7 +183,7 @@ LOOP2:
 			case !ok:
 				s.logger.Info("Connection is closed by peer", "from", r.Host, "url", r.RequestURI)
 				cancel()
-			case cmd== COM_BYE:
+			case cmd == COM_BYE:
 				s.logger.Info("Connection closing by BYE command", "from", r.Host, "url", r.RequestURI)
 				cancel()
 			}
